@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{220fd648-5544-450a-a695-ad25c9eef709}</ProjectGuid>
+    <RootNamespace>project</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <AdditionalIncludeDirectories>../external/SDL2-2.0.20/include;../external/glew-2.1.0/include;../external/imgui;../external/imgui/backends;../external/ImGuiFileDialog;../external/glm-0.9.9.8/glm;../external/opencv/build/include;../external;../inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <UseFullPaths>true</UseFullPaths>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>../external/glew-2.1.0/lib/Release/x64/glew32.lib;../external/SDL2-2.0.20/lib/x64/SDL2.lib;../external/SDL2-2.0.20/lib/x64/SDL2main.lib;../external/opencv/build/x64/vc15/lib/opencv_world460d.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y "$(SolutionDir)..\external\glew-2.1.0\bin\Release\x64\glew32.dll" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\external\SDL2-2.0.20\lib\x64\SDL2.dll" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\external\opencv\build\x64\vc15\bin\opencv_world460d.dll" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.f" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\scaleImage.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\scaleImage.f" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.f" "$(TargetDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <AdditionalIncludeDirectories>../external/SDL2-2.0.20/include;../external/glew-2.1.0/include;../external/imgui;../external/imgui/backends;../external/ImGuiFileDialog;../external/glm-0.9.9.8/glm;../external/opencv/build/include;../external;../inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <UseFullPaths>true</UseFullPaths>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>../external/glew-2.1.0/lib/Release/x64/glew32.lib;../external/SDL2-2.0.20/lib/x64/SDL2.lib;../external/SDL2-2.0.20/lib/x64/SDL2main.lib;../external/opencv/build/x64/vc15/lib/opencv_world460.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y "$(SolutionDir)..\external\glew-2.1.0\bin\Release\x64\glew32.dll" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\external\SDL2-2.0.20\lib\x64\SDL2.dll" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\external\opencv\build\x64\vc15\bin\opencv_world460.dll" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.f" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\scaleImage.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\scaleImage.f" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.f" "$(TargetDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\external\ImGuiFileDialog\ImGuiFileDialog.cpp" />
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_sdl.cpp" />
+    <ClCompile Include="..\external\imgui\imgui.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\external\implot\implot.cpp" />
+    <ClCompile Include="..\external\implot\implot_demo.cpp" />
+    <ClCompile Include="..\external\implot\implot_items.cpp" />
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\misc.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_sdl.h" />
+    <ClInclude Include="..\inc\misc.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shader\fullscreenQuad.f" />
+    <None Include="..\shader\fullscreenQuad.v" />
+    <None Include="..\shader\operations.f" />
+    <None Include="..\shader\operations.v" />
+    <None Include="..\shader\scaleImage.f" />
+    <None Include="..\shader\scaleImage.v" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

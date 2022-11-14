@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="inc">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{497313aa-6876-4a2c-9724-10533e47b2bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{a4872d1b-9603-4bac-a103-3c6445390929}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ImGuiFileDialog">
+      <UniqueIdentifier>{2f975453-1f3b-4f56-ba82-e6e20c7be0b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui">
+      <UniqueIdentifier>{566b922c-a2c8-4c69-b37d-f258306273ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui\backends">
+      <UniqueIdentifier>{5acf2c2e-a163-4e97-ad22-7e71d4fa72ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\implot">
+      <UniqueIdentifier>{03d58390-f764-4c74-b4de-7e5c57437037}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\misc.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\ImGuiFileDialog\ImGuiFileDialog.cpp">
+      <Filter>external\ImGuiFileDialog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui_demo.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui_draw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui_tables.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui_widgets.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>external\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_sdl.cpp">
+      <Filter>external\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\implot\implot.cpp">
+      <Filter>external\implot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\implot\implot_demo.cpp">
+      <Filter>external\implot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\implot\implot_items.cpp">
+      <Filter>external\implot</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\inc\misc.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>external\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_sdl.h">
+      <Filter>external\imgui\backends</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shader\fullscreenQuad.f">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\shader\fullscreenQuad.v">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\shader\scaleImage.f">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\shader\scaleImage.v">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\shader\operations.f">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\shader\operations.v">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+</Project>
