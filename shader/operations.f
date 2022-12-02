@@ -44,9 +44,23 @@ uniform float meshifyThickness;
 uniform uint meshify;
 ///////////////////////
 
+
+/////////////////////
+///////Sketch////////
+uniform float angleNum;
+uniform float range;
+uniform float sensitivity;
+
 in vec4 gl_FragCoord;
 
 out vec3 color;
+
+#define PI2 6.28318530717959
+
+#define RANGE 16.
+#define STEP 2.
+#define MAGIC_GRAD_THRESH 0.01
+#define MAGIC_COLOR           0.5
 
 float luminance(in vec3 rgb)
 {
@@ -57,6 +71,27 @@ float luminance(in vec3 rgb)
   //Luminace = 0.299 * Red + 0.587 * Green + 0.114 * Blue
   //uint8_t luminance = 0.3086f * buffer[bufferIdx] + 0.6094f * buffer[bufferIdx + 1] + 0.0820f * buffer[bufferIdx + 2];
   return dot(rgb, vec3(0.3086f, 0.6094f, 0.082f));
+}
+
+vec4 getCol(vec2 pos)
+{
+    vec2 uv = pos /textureSize(sourceTexture1, 0).xy;
+    return texture(sourceTexture1, uv);
+}
+
+vec2 getGrad(vec2 pos, float eps)
+{
+    vec2 textureDimension = textureSize(sourceTexture1, 0);
+   	vec2 d=vec2(eps,0);
+    return vec2(
+        luminance(texture(sourceTexture1,(pos+d.xy)/textureDimension.xy).rgb)-luminance(texture(sourceTexture1,(pos-d.xy)/textureDimension.xy).rgb),
+        luminance(texture(sourceTexture1,(pos+d.yx)/textureDimension.xy).rgb)-luminance(texture(sourceTexture1,(pos-d.yx)/textureDimension.xy).rgb)
+    )/eps/2.;
+}
+
+void pR(inout vec2 p, float a) 
+{
+	p = cos(a)*p + sin(a)*vec2(p.y, -p.x);
 }
 
 vec3 sobel()
@@ -135,10 +170,10 @@ vec3 pixellating()
 
 vec3 waterColor()
 {
-  vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
-  vec2 blend_uv = floor(gl_FragCoord.xy) / textureDimension;
-  vec2 uv = vec2(1.0 - blend_uv.x, blend_uv.y);
-  vec3 intensity = 1.0 - texture(sourceTexture1, uv).rgb;
+    vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
+    vec2 blend_uv = gl_FragCoord.xy / textureSize(sourceTexture1, 0);
+    vec2 uv = vec2(1.0-blend_uv.x, blend_uv.y);
+    vec3 intensity = 1.0 - texture(sourceTexture1, uv).rgb;
     
   float vidSample = dot(vec3(1.0), texture(sourceTexture1, uv).rgb);
   float delta = 0.005;
@@ -147,8 +182,9 @@ vec3 waterColor()
     
   vec2 flow = delta * vec2 (vidSampleDy - vidSample, vidSample - vidSampleDx);
     
-  intensity = 0.005 * intensity + 0.995 * (1.0 - texture(sourceTexture2, blend_uv + vec2(-1.0, 1.0) * flow).rgb);
-  return 1.0 - intensity;
+    intensity = 0.0225 * intensity + 0.9775 * (1.0 - texture(sourceTexture2, blend_uv + vec2(-1.0, 1.0) * flow).rgb); //blend_uv).rgb);
+    return 1.0 - intensity;
+
 }
 
 vec3 radialFlare()
@@ -292,6 +328,49 @@ vec3 Meshify()
   return color;
 }
 
+vec3 sketch()
+{
+    vec2 textureDimension = textureSize(sourceTexture1, 0);
+    vec2 pos = gl_FragCoord.xy;
+    float weight = 1.0;
+    
+    for (float j = 0.; j < angleNum; j += 1.)
+    {
+        vec2 dir = vec2(1, 0);
+        pR(dir, j * PI2 / (2. * angleNum));
+        
+        vec2 grad = vec2(-dir.y, dir.x);
+        
+        for (float i = -range; i <= range; i += STEP)
+        {
+            vec2 pos2 = pos + normalize(dir)*i;
+            
+            if (pos2.y < 0. || pos2.x < 0. || pos2.x > textureDimension.x || pos2.y > textureDimension.y)
+                continue;
+            
+            vec2 g = getGrad(pos2, 1.);
+            if (length(g) < MAGIC_GRAD_THRESH)
+                continue;
+            
+            weight -= pow(abs(dot(normalize(grad), normalize(g))), sensitivity) / floor((2. * range + 1.) / STEP) / angleNum;
+        }
+    }
+    
+    //vec4 col = texture(sourceTexture1, pos/textureDimension.xy);
+    vec4 col = vec4(luminance(texture(sourceTexture1, pos/textureDimension.xy).rgb));
+    
+    vec4 background = mix(col, vec4(1), MAGIC_COLOR);
+ 
+    // because apparently all shaders need one of these. It's like a law or something.
+    float r = length(pos - textureDimension.xy*.5) / textureDimension.x;
+    float vign = 1. - r*r*r;
+    
+    vec4 a = texture(sourceTexture1, pos/textureDimension.xy);
+    
+    col = vign * mix(vec4(0), background, weight) + a.xxxx/25.;
+    return col.rbg;
+}
+
 void main()
 {
   switch (operationIndex)
@@ -327,6 +406,10 @@ void main()
 
     case 7:
       color = GradientColor();
+      break;
+
+    case 8:
+      color = sketch();
       break;
 
 //    default:

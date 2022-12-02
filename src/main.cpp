@@ -168,6 +168,10 @@ namespace global {
 
   //Gradient Color
   uint32_t paletteIdx = 0;
+  //Sketch
+  float angleNum = 4.0f;
+  float range = 16.f;
+  float sensitivity = 10.f;
 
   float iTime = 0.0;
 }
@@ -549,6 +553,13 @@ static void ImGuiDraw()
     if (ImGui::Selectable("Palette 11", global::paletteIdx == 11))
       global::paletteIdx = 11;
     ImGui::Separator();
+
+    if (ImGui::Button("Sketch"))
+        global::operationIndex = 8;
+    ImGui::DragFloat("Angle Num", &global::angleNum, 2.0f, 2.f, 10.f);
+    ImGui::DragFloat("Range", &global::range, 2.0f, 2.f, 32.f);
+    ImGui::DragFloat("Sensitivity", &global::sensitivity, 1.f, 1.f, 20.f);
+    ImGui::Separator();
   }
 
 
@@ -584,6 +595,7 @@ static void readSourceTexture(GLuint srcTexture, GLuint destTexture)
         0, GL_RGB,
         GL_UNSIGNED_BYTE, //8 bits
         global::copied.data());
+
 }
 
 //Should be called after both source textures are resized to equal sizes.
@@ -592,6 +604,7 @@ static void operationsUber(GLuint srcTexture1, GLuint srcTexture2, GLuint destTe
   if (!glIsTexture(srcTexture1) ||
       !glIsTexture(destTexture))
     return;
+
 
   glUseProgram(global::programs[global::operations]);
   opengl_check_error();
@@ -637,7 +650,16 @@ static void operationsUber(GLuint srcTexture1, GLuint srcTexture2, GLuint destTe
   glUniform1ui(loc, global::meshify);
   opengl_check_error();
 
-  loc = glGetUniformLocation(global::programs[global::operations], "chromaticAuto");
+    //readSourceTexture(global::reserveTexture2, global::reserveTexture1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    opengl_check_error();
+    glBindTexture(GL_TEXTURE_2D, srcTexture2);
+    opengl_check_error();
+
+    glBindTexture(GL_TEXTURE_2D, destTexture);
+    opengl_check_error();
+  
+    loc = glGetUniformLocation(global::programs[global::operations], "chromaticAuto");
   opengl_check_error();
   glUniform1ui(loc, global::chromaticAuto);
   opengl_check_error();
@@ -666,6 +688,21 @@ static void operationsUber(GLuint srcTexture1, GLuint srcTexture2, GLuint destTe
   loc = glGetUniformLocation(global::programs[global::operations], "paletteIdx");
   opengl_check_error();
   glUniform1ui(loc, global::paletteIdx);
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "angleNum");
+  opengl_check_error();
+  glUniform1f(loc, global::angleNum);
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "range");
+  opengl_check_error();
+  glUniform1f(loc, global::range);
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "sensitivity");
+  opengl_check_error();
+  glUniform1f(loc, global::sensitivity);
   opengl_check_error();
 
   //glActiveTexture selects which texture unit subsequent texture state calls will affect.
@@ -755,8 +792,10 @@ static void draw(double deltaTime)
 
     ///////////////OPERATIONS///////////////
     operationsUber(global::sourceTexture, global::reserveTexture1, global::reserveTexture2);
+    
 
-    //readSourceTexture(global::reserveTexture2, global::reserveTexture1);
+    readSourceTexture(global::reserveTexture2, global::reserveTexture1);
+
     scaleTexture(global::reserveTexture2, global::destinationTexture, global::windowWidth, global::windowHeight);
 
     drawFullscreenQuad(global::destinationTexture);
@@ -1096,6 +1135,7 @@ int main(int, char* [])
 
     glBindTexture(GL_TEXTURE_2D, global::reserveTexture2);
     opengl_check_error();
+
     //No matter what the source textures' formats are, reduce the output texture to 8 bit texture.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, //Only supporting 256 pixel depth (8 bits) PPM P3 image.
         global::sourceWidth, global::sourceHeight,
