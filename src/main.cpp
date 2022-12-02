@@ -166,6 +166,9 @@ namespace global {
   uint32_t chromaticAuto = 0;
   float offsetAmount = 0.125f;
 
+  //Gradient Color
+  uint32_t paletteIdx = 0;
+
   float iTime = 0.0;
 }
 
@@ -521,8 +524,33 @@ static void ImGuiDraw()
 
     if (ImGui::Button("Gradient Color"))
       global::operationIndex = 7;
+    if (ImGui::Selectable("Palette 0", global::paletteIdx == 0))
+      global::paletteIdx = 0;
+    if (ImGui::Selectable("Palette 1", global::paletteIdx == 1))
+      global::paletteIdx = 1;
+    if (ImGui::Selectable("Palette 2", global::paletteIdx == 2))
+      global::paletteIdx = 2;
+    if (ImGui::Selectable("Palette 3", global::paletteIdx == 3))
+      global::paletteIdx = 3;
+    if (ImGui::Selectable("Palette 4", global::paletteIdx == 4))
+      global::paletteIdx = 4;
+    if (ImGui::Selectable("Palette 5", global::paletteIdx == 5))
+      global::paletteIdx = 5;
+    if (ImGui::Selectable("Palette 6", global::paletteIdx == 6))
+      global::paletteIdx = 6;
+    if (ImGui::Selectable("Palette 7", global::paletteIdx == 7))
+      global::paletteIdx = 7;
+    if (ImGui::Selectable("Palette 8", global::paletteIdx == 8))
+      global::paletteIdx = 8;
+    if (ImGui::Selectable("Palette 9", global::paletteIdx == 9))
+      global::paletteIdx = 9;
+    if (ImGui::Selectable("Palette 10", global::paletteIdx == 10))
+      global::paletteIdx = 10;
+    if (ImGui::Selectable("Palette 11", global::paletteIdx == 11))
+      global::paletteIdx = 11;
     ImGui::Separator();
   }
+
 
   ImGui::End();
 
@@ -635,6 +663,10 @@ static void operationsUber(GLuint srcTexture1, GLuint srcTexture2, GLuint destTe
   glUniform1f(loc, global::iTime);
   opengl_check_error();
 
+  loc = glGetUniformLocation(global::programs[global::operations], "paletteIdx");
+  opengl_check_error();
+  glUniform1ui(loc, global::paletteIdx);
+  opengl_check_error();
 
   //glActiveTexture selects which texture unit subsequent texture state calls will affect.
   glActiveTexture(GL_TEXTURE0);

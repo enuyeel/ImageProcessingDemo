@@ -26,6 +26,11 @@ uniform float k;
 uniform float iTime;
 
 ////////////////////////
+/////Gradient Color/////
+uniform uint paletteIdx;
+////////////////////////
+
+////////////////////////
 //Chromatic Aberration//
 uniform float offsetAmount;
 uniform uint chromaticAuto;
@@ -166,6 +171,11 @@ vec3 radialFlare()
   return o*o+flare;
 }
 
+vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
+{
+    return a + b*cos( 6.28318*(c*t+d) );
+}
+
 vec3 GradientColor()
 {
   vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
@@ -173,22 +183,85 @@ vec3 GradientColor()
 
   float lum = luminance(texture(sourceTexture1, uv, 0).rgb);
 
-  vec3 heat;      
-  heat.r = smoothstep(0.5, 0.8, lum);
+  switch (paletteIdx)
+  {
+    case uint(0):
+    {
+      vec3 heat;      
+      heat.r = smoothstep(0.5, 0.8, lum);
   
-  if(lum >= 0.90)
-    heat.r *= (1.1 - lum) * 5.0;
+      if(lum >= 0.90)
+        heat.r *= (1.1 - lum) * 5.0;
 
-	if(lum > 0.7) 
-		heat.g = smoothstep(1.0, 0.7, lum);
-  else 
-		heat.g = smoothstep(0.0, 0.7, lum);
+	    if(lum > 0.7) 
+		    heat.g = smoothstep(1.0, 0.7, lum);
+      else 
+		    heat.g = smoothstep(0.0, 0.7, lum);
 
-	heat.b = smoothstep(1.0, 0.0, lum);          
-  if(lum <= 0.3) 
-    heat.b *= lum / 0.3;     
+	    heat.b = smoothstep(1.0, 0.0, lum);          
+      if(lum <= 0.3) 
+        heat.b *= lum / 0.3;     
 
-	return heat;
+	    return heat;
+    } break;
+
+    case uint(1):
+    {
+      return pal(lum,vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(0.8,0.8,0.8),vec3(0.0,0.33,0.67)+0.21);
+    } break;
+
+    case uint(2):
+    {
+      return pal(lum,vec3(0.55,0.4,0.3),vec3(0.50,0.51,0.35)+0.1,vec3(0.8,0.75,0.8),vec3(0.075,0.33,0.67)+0.21);
+    } break;
+
+    case uint(3):
+    {
+      return pal(lum,vec3(0.55),vec3(0.8),vec3(0.29),vec3(0.00,0.05,0.15) + 0.54 );
+    } break;
+
+    case uint(4):
+    {
+      return pal(lum,vec3(0.5),vec3(0.55),vec3(0.45),vec3(0.00,0.10,0.20) + 0.47 );
+    } break;
+
+    case uint(5):
+    {
+      return pal(lum,vec3(0.5),vec3(0.5),vec3(0.9),vec3(0.3,0.20,0.20) + 0.31 );
+    } break;
+
+    case uint(6):
+    {
+      return pal(lum,vec3(0.5),vec3(0.5),vec3(0.9),vec3(0.0,0.10,0.20) + 0.47 );
+    } break;
+
+    case uint(7):
+    {
+      return pal(lum,vec3(0.5),vec3(0.5),vec3(1.0,1.0,0.5),vec3(0.8,0.90,0.30) );
+    } break;
+
+    case uint(8):
+    {
+      return pal(lum,vec3(0.5),vec3(0.5),vec3(1.0,0.7,0.4),vec3(0.0,0.15,0.20) );
+    } break;
+
+    case uint(9):
+    {
+      return pal(lum,vec3(0.5),vec3(0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25) );
+    } break;
+
+    case uint(10):
+    {
+      return pal(lum,vec3(0.5),vec3(0.5),vec3(1),vec3(0.0,0.33,0.67));
+    } break;
+
+    case uint(11):
+    {
+      return pal(lum,vec3(0.8,0.5,0.4),vec3(0.2,0.4,0.2),vec3(2.0,1.0,1.0),vec3(0.0,0.25,0.25) );
+    } break;
+  }
+
+  return vec3(0.0);
 }
 
 vec3 Meshify()
