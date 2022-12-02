@@ -155,6 +155,18 @@ namespace global {
 
   std::vector<std::pair<uint32_t, uint32_t>> webcamResolutions;
   cv::Mat frame;
+
+  //Meshify
+  float interlineDistance = 8.f;
+  uint32_t meshify = 0; //GLSL; an unsigned 32-bit integer
+  float amplicationFactor = 4.f;
+  float meshifyThickness = 6.f;
+
+  //Chromatic Aberration
+  uint32_t chromaticAuto = 0;
+  float offsetAmount = 0.125f;
+
+  float iTime = 0.0;
 }
 
 static void initializeEmptyTexture(GLuint destinationTexture, int width, int height)
@@ -450,14 +462,8 @@ static void ImGuiDraw()
 {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplSDL2_NewFrame();
+
   ImGui::NewFrame();
-
-  //ImPlot::ShowDemoWindow();
-
-  //static bool showDemoWindow = false;
-  //static ImGuiIO& io = ImGui::GetIO();
-  //static bool showDemoWindow = true;
-  //ImGui::ShowDemoWindow(&showDemoWindow);
 
   static bool isDockspaceOpen = true;
 
@@ -471,34 +477,51 @@ static void ImGuiDraw()
 
   if (ImGui::CollapsingHeader("Image Operations"))
   {
-      if (ImGui::Button("Default"))
-      {
-          global::operationIndex = 0;
-      }
-      if (ImGui::Button("Negative"))
-      {
-          global::operationIndex = 1;
-      }
-      if (ImGui::Button("Edge Detection"))
-      {
-          global::operationIndex = 2;
-      }
-      if (ImGui::Button("Chromatic Aberration"))
-      {
-          global::operationIndex = 3;
-      }
-      if (ImGui::Button("Pixellation"))
-      {
-          global::operationIndex = 4;
-      }
-      if (ImGui::Button("Water"))
-      {
-          global::operationIndex = 5;
-      }
-      if (ImGui::Button("Meshify"))
-      {
-          global::operationIndex = 6;
-      }
+    if (ImGui::Button("Default"))
+      global::operationIndex = 0;  
+    ImGui::Separator();
+
+    if (ImGui::Button("Negative"))
+      global::operationIndex = 1;
+    ImGui::Separator();
+
+    if (ImGui::Button("Edge Detection"))
+      global::operationIndex = 2;
+    ImGui::Separator();
+
+    if (ImGui::Button("Chromatic Aberration"))
+      global::operationIndex = 3;
+    ImGui::DragFloat("Offset", &global::offsetAmount, 0.01f, 0.f, 1.f);
+    if (ImGui::Selectable("Manual", global::chromaticAuto == 0))
+      global::chromaticAuto = 0;
+    if (ImGui::Selectable("Auto", global::chromaticAuto == 1))
+      global::chromaticAuto = 1;
+    ImGui::Separator();
+
+    if (ImGui::Button("Pixellation"))
+      global::operationIndex = 4;
+    ImGui::Separator();
+
+    if (ImGui::Button("Water"))
+      global::operationIndex = 5;
+    ImGui::Separator();
+
+    if (ImGui::Button("Meshify"))
+      global::operationIndex = 6;
+    ImGui::DragFloat("Interline Distance", &global::interlineDistance, 0.1f, 5.f, 20.f);
+    ImGui::DragFloat("Amplication Factor", &global::amplicationFactor, 0.1f, 1.f, 10.f);
+    ImGui::DragFloat("Thickness", &global::meshifyThickness, 0.1f, 1.f, 10.f);
+    if (ImGui::Selectable("Horizontal", global::meshify == 0))
+      global::meshify = 0;
+    if (ImGui::Selectable("Vertical", global::meshify == 1))
+      global::meshify = 1;
+    if (ImGui::Selectable("Horizontal & Vertical", global::meshify == 2))
+      global::meshify = 2;
+    ImGui::Separator();
+
+    if (ImGui::Button("Gradient Color"))
+      global::operationIndex = 7;
+    ImGui::Separator();
   }
 
   ImGui::End();
@@ -538,100 +561,135 @@ static void readSourceTexture(GLuint srcTexture, GLuint destTexture)
 //Should be called after both source textures are resized to equal sizes.
 static void operationsUber(GLuint srcTexture1, GLuint srcTexture2, GLuint destTexture)
 {
-    if (!glIsTexture(srcTexture1) ||
-        !glIsTexture(destTexture))
-        return;
+  if (!glIsTexture(srcTexture1) ||
+      !glIsTexture(destTexture))
+    return;
+
+  glUseProgram(global::programs[global::operations]);
+  opengl_check_error();
+
+  GLint loc = glGetUniformLocation(global::programs[global::operations], "mtow");
+  opengl_check_error();
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(global::mtow));
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "wtoc");
+  opengl_check_error();
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(global::wtoc));
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "ctoc");
+  opengl_check_error();
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(global::ctoc));
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "sourceTexture1");
+  opengl_check_error();
+  glUniform1i(loc, 0);
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "sourceTexture2");
+  opengl_check_error();
+  glUniform1i(loc, 1);
+  opengl_check_error();
+
+  //uniform int operations;
+  loc = glGetUniformLocation(global::programs[global::operations], "operationIndex");
+  opengl_check_error();
+  glUniform1i(loc, global::operationIndex);
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "interlineDistance");
+  opengl_check_error();
+  glUniform1f(loc, global::interlineDistance);
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "meshify");
+  opengl_check_error();
+  glUniform1ui(loc, global::meshify);
+  opengl_check_error();
+
+  loc = glGetUniformLocation(global::programs[global::operations], "chromaticAuto");
+  opengl_check_error();
+  glUniform1ui(loc, global::chromaticAuto);
+  opengl_check_error();
 
 
-    glUseProgram(global::programs[global::operations]);
-    opengl_check_error();
+  loc = glGetUniformLocation(global::programs[global::operations], "amplicationFactor");
+  opengl_check_error();
+  glUniform1f(loc, global::amplicationFactor);
+  opengl_check_error();
 
-    GLint loc = glGetUniformLocation(global::programs[global::operations], "mtow");
-    opengl_check_error();
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(global::mtow));
-    opengl_check_error();
+  loc = glGetUniformLocation(global::programs[global::operations], "meshifyThickness");
+  opengl_check_error();
+  glUniform1f(loc, global::meshifyThickness);
+  opengl_check_error();
 
-    loc = glGetUniformLocation(global::programs[global::operations], "wtoc");
-    opengl_check_error();
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(global::wtoc));
-    opengl_check_error();
+  loc = glGetUniformLocation(global::programs[global::operations], "offsetAmount");
+  opengl_check_error();
+  glUniform1f(loc, global::offsetAmount);
+  opengl_check_error();
 
-    loc = glGetUniformLocation(global::programs[global::operations], "ctoc");
-    opengl_check_error();
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(global::ctoc));
-    opengl_check_error();
-
-    loc = glGetUniformLocation(global::programs[global::operations], "sourceTexture1");
-    opengl_check_error();
-    glUniform1i(loc, 0);
-    opengl_check_error();
-
-    loc = glGetUniformLocation(global::programs[global::operations], "sourceTexture2");
-    opengl_check_error();
-    glUniform1i(loc, 1);
-    opengl_check_error();
-
-    //uniform int operations;
-    loc = glGetUniformLocation(global::programs[global::operations], "operationIndex");
-    opengl_check_error();
-    glUniform1i(loc, global::operationIndex);
-    opengl_check_error();
-
-    //glActiveTexture selects which texture unit subsequent texture state calls will affect.
-    glActiveTexture(GL_TEXTURE0);
-    opengl_check_error();
-    glBindTexture(GL_TEXTURE_2D, srcTexture1);
-    opengl_check_error();
-
-    //readSourceTexture(global::reserveTexture2, global::reserveTexture1);
-    glActiveTexture(GL_TEXTURE0 + 1);
-    opengl_check_error();
-    glBindTexture(GL_TEXTURE_2D, destTexture);
-    opengl_check_error();
-
-    glActiveTexture(GL_TEXTURE0 + 2);
-    opengl_check_error();
-    glBindTexture(GL_TEXTURE_2D, destTexture);
-    opengl_check_error();
+  loc = glGetUniformLocation(global::programs[global::operations], "iTime");
+  opengl_check_error();
+  glUniform1f(loc, global::iTime);
+  opengl_check_error();
 
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    opengl_check_error();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    opengl_check_error();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    opengl_check_error();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    opengl_check_error();
+  //glActiveTexture selects which texture unit subsequent texture state calls will affect.
+  glActiveTexture(GL_TEXTURE0);
+  opengl_check_error();
+  glBindTexture(GL_TEXTURE_2D, srcTexture1);
+  opengl_check_error();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, global::myFramebuffer);
-    opengl_check_error();
+  //readSourceTexture(global::reserveTexture2, global::reserveTexture1);
+  glActiveTexture(GL_TEXTURE0 + 1);
+  opengl_check_error();
+  glBindTexture(GL_TEXTURE_2D, destTexture);
+  opengl_check_error();
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, destTexture, 0);
-    opengl_check_error();
+  glActiveTexture(GL_TEXTURE0 + 2);
+  opengl_check_error();
+  glBindTexture(GL_TEXTURE_2D, destTexture);
+  opengl_check_error();
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        glUseProgram(0);
-        opengl_check_error();
-        return;
-    }
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  opengl_check_error();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  opengl_check_error();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  opengl_check_error();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  opengl_check_error();
 
-    glViewport(0, 0, global::sourceWidth, global::sourceHeight);
-    opengl_check_error();
+  glBindFramebuffer(GL_FRAMEBUFFER, global::myFramebuffer);
+  opengl_check_error();
 
-    glBindVertexArray(global::vertexArrayObjects[global::quad]);
-    opengl_check_error();
-    glDrawArrays(GL_TRIANGLES, 0, (sizeof(global::quadModelSpaceVertices) / sizeof(global::quadModelSpaceVertices[0])) / 3);
-    opengl_check_error();
-    glBindVertexArray(0);
-    opengl_check_error();
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, destTexture, 0);
+  opengl_check_error();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    opengl_check_error();
-
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+  {
     glUseProgram(0);
     opengl_check_error();
+    return;
+  }
+
+  glViewport(0, 0, global::sourceWidth, global::sourceHeight);
+  opengl_check_error();
+
+  glBindVertexArray(global::vertexArrayObjects[global::quad]);
+  opengl_check_error();
+  glDrawArrays(GL_TRIANGLES, 0, (sizeof(global::quadModelSpaceVertices) / sizeof(global::quadModelSpaceVertices[0])) / 3);
+  opengl_check_error();
+  glBindVertexArray(0);
+  opengl_check_error();
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  opengl_check_error();
+
+  glUseProgram(0);
+  opengl_check_error();
 }
 static void draw(double deltaTime)
 {
@@ -758,6 +816,8 @@ static void loop(void* arg)
     now = SDL_GetPerformanceCounter();
 
     deltaTime = (double)((now - last) * 1000 / (double)SDL_GetPerformanceFrequency() );
+
+    global::iTime += deltaTime;
 
     draw(deltaTime);
 

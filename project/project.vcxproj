@@ -72,7 +72,9 @@ xcopy /y "$(SolutionDir)..\external\opencv\build\x64\vc15\bin\opencv_world460d.d
 xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.v" "$(TargetDir)"
 xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.f" "$(TargetDir)"
 xcopy /y "$(SolutionDir)..\shader\scaleImage.v" "$(TargetDir)"
-xcopy /y "$(SolutionDir)..\shader\scaleImage.f" "$(TargetDir)"</Command>
+xcopy /y "$(SolutionDir)..\shader\scaleImage.f" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.f" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -102,7 +104,9 @@ xcopy /y "$(SolutionDir)..\external\opencv\build\x64\vc15\bin\opencv_world460.dl
 xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.v" "$(TargetDir)"
 xcopy /y "$(SolutionDir)..\shader\fullscreenQuad.f" "$(TargetDir)"
 xcopy /y "$(SolutionDir)..\shader\scaleImage.v" "$(TargetDir)"
-xcopy /y "$(SolutionDir)..\shader\scaleImage.f" "$(TargetDir)"</Command>
+xcopy /y "$(SolutionDir)..\shader\scaleImage.f" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.v" "$(TargetDir)"
+xcopy /y "$(SolutionDir)..\shader\operations.f" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

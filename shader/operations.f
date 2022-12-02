@@ -23,6 +23,22 @@ uniform float sigma;
 uniform float k;
 ////////////////////////
 
+uniform float iTime;
+
+////////////////////////
+//Chromatic Aberration//
+uniform float offsetAmount;
+uniform uint chromaticAuto;
+////////////////////////
+
+///////////////////////
+////////Meshify////////
+uniform float interlineDistance;
+uniform float amplicationFactor;
+uniform float meshifyThickness;
+uniform uint meshify;
+///////////////////////
+
 in vec4 gl_FragCoord;
 
 out vec3 color;
@@ -78,93 +94,129 @@ vec3 imageNegative()
 
 vec3 chromaticAberration()
 {
-    vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
-    vec2 p = floor(gl_FragCoord.xy) / textureDimension;
-	float amount = 0.125;
+  vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
+  vec2 p = floor(gl_FragCoord.xy) / textureDimension;
 	
-	//amount = (1.0 + sin(iTime*6.0)) * 0.5;
-	//amount *= 1.0 + sin(iTime*16.0) * 0.5;
-	//amount *= 1.0 + sin(iTime*19.0) * 0.5;
-	//amount *= 1.0 + sin(iTime*27.0) * 0.5;
-	//amount = pow(amount, 3.0);
-
-	//amount *= 0.05;
+  float amount = offsetAmount;
+  if (chromaticAuto == uint(1))
+  {
+	  amount = (1.0 + sin(iTime*6.0)) * 0.5;
+	  amount *= 1.0 + sin(iTime*16.0) * 0.5;
+	  amount *= 1.0 + sin(iTime*19.0) * 0.5;
+	  amount *= 1.0 + sin(iTime*27.0) * 0.5;
+	  amount = pow(amount, 3.0);
+    amount *= 0.05;
+  }
 	
-    vec3 col;
-    col.r = texture( sourceTexture1, vec2(p.x+amount,p.y) ).r;
-    col.g = texture( sourceTexture1, p ).g;
-    col.b = texture( sourceTexture1, vec2(p.x-amount,p.y) ).b;
+  vec3 col;
+  col.r = texture( sourceTexture1, vec2(p.x + amount, p.y) ).r;
+  col.g = texture( sourceTexture1, p ).g;
+  col.b = texture( sourceTexture1, vec2(p.x - amount, p.y) ).b;
 
 	col *= (1.0 - amount * 0.5);
-	
-    return col;
+	return col;
 }
 
 vec3 pixellating()
 {
-    float pixelly = 0.1f;
+  float pixelly = 0.1f;
 
-    vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
-    vec2 uv = floor(gl_FragCoord.xy) / textureDimension;
-    uv = floor(uv*textureDimension.x*pixelly)/(textureDimension.x*pixelly);
+  vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
+  vec2 uv = floor(gl_FragCoord.xy) / textureDimension;
+  uv = floor(uv*textureDimension.x*pixelly)/(textureDimension.x*pixelly);
 
-    return texture(sourceTexture1, uv).rgb;
+  return texture(sourceTexture1, uv).rgb;
 }
 
 vec3 waterColor()
 {
-    vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
-    vec2 blend_uv = floor(gl_FragCoord.xy) / textureDimension;
-    vec2 uv = vec2(1.0 - blend_uv.x, blend_uv.y);
-    vec3 intensity = 1.0 - texture(sourceTexture1, uv).rgb;
+  vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
+  vec2 blend_uv = floor(gl_FragCoord.xy) / textureDimension;
+  vec2 uv = vec2(1.0 - blend_uv.x, blend_uv.y);
+  vec3 intensity = 1.0 - texture(sourceTexture1, uv).rgb;
     
-    float vidSample = dot(vec3(1.0), texture(sourceTexture1, uv).rgb);
-    float delta = 0.005;
-    float vidSampleDx = dot(vec3(1.0), texture(sourceTexture1, uv + vec2(delta, 0.0)).rgb);
-    float vidSampleDy = dot(vec3(1.0), texture(sourceTexture1, uv + vec2(0.0, delta)).rgb);
+  float vidSample = dot(vec3(1.0), texture(sourceTexture1, uv).rgb);
+  float delta = 0.005;
+  float vidSampleDx = dot(vec3(1.0), texture(sourceTexture1, uv + vec2(delta, 0.0)).rgb);
+  float vidSampleDy = dot(vec3(1.0), texture(sourceTexture1, uv + vec2(0.0, delta)).rgb);
     
-    vec2 flow = delta * vec2 (vidSampleDy - vidSample, vidSample - vidSampleDx);
+  vec2 flow = delta * vec2 (vidSampleDy - vidSample, vidSample - vidSampleDx);
     
-    intensity = 0.005 * intensity + 0.995 * (1.0 - texture(sourceTexture2, blend_uv + vec2(-1.0, 1.0) * flow).rgb);
-    return 1.0 - intensity;
+  intensity = 0.005 * intensity + 0.995 * (1.0 - texture(sourceTexture2, blend_uv + vec2(-1.0, 1.0) * flow).rgb);
+  return 1.0 - intensity;
 }
 
 vec3 radialFlare()
 {
-    float imageBrightness = 9.0;
-    float flareBrightness = 4.5;
-    float radialLength = 0.95;
+  float imageBrightness = 9.0;
+  float flareBrightness = 4.5;
+  float radialLength = 0.95;
 
-    vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
-    vec3 p = vec3(gl_FragCoord.xy / textureDimension, max(0.0, (imageBrightness/10.0)-0.5)) - 0.5;
-    vec3 o = texture(sourceTexture1,0.5+(p.xy*=0.992)).rgb;
+  vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
+  vec3 p = vec3(gl_FragCoord.xy / textureDimension, max(0.0, (imageBrightness/10.0)-0.5)) - 0.5;
+  vec3 o = texture(sourceTexture1,0.5+(p.xy*=0.992)).rgb;
     
-    for (float i=0.0; i<100.0; i++)
-    {
-        p.z += pow(max(0.0, 0.5-length(o)), 10.0/flareBrightness) * exp(-i * (1.0-(radialLength)) );
-    }
+  for (float i=0.0; i<100.0; i++)
+  {
+    p.z += pow(max(0.0, 0.5-length(o)), 10.0/flareBrightness) * exp(-i * (1.0-(radialLength)) );
+  }
     
-    vec3 flare = p.z * vec3(0.7, 0.9, 1.0); //tint
+  vec3 flare = p.z * vec3(0.7, 0.9, 1.0); //tint
     
-    return o*o+flare;
+  return o*o+flare;
+}
+
+vec3 GradientColor()
+{
+  vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
+  vec2 uv = floor(gl_FragCoord.xy) / textureDimension;
+
+  float lum = luminance(texture(sourceTexture1, uv, 0).rgb);
+
+  vec3 heat;      
+  heat.r = smoothstep(0.5, 0.8, lum);
+  
+  if(lum >= 0.90)
+    heat.r *= (1.1 - lum) * 5.0;
+
+	if(lum > 0.7) 
+		heat.g = smoothstep(1.0, 0.7, lum);
+  else 
+		heat.g = smoothstep(0.0, 0.7, lum);
+
+	heat.b = smoothstep(1.0, 0.0, lum);          
+  if(lum <= 0.3) 
+    heat.b *= lum / 0.3;     
+
+	return heat;
 }
 
 vec3 Meshify()
 {
-    color -= color;
-    vec2 uv = gl_FragCoord.xy;
-    uv /= 8.0;
-    vec2  p = floor(uv+.5);
-    vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
+  color -= color;
+  vec2 uv = gl_FragCoord.xy;
 
-    #define T(x,y) texture(sourceTexture1,8.0*vec2(x,y)/textureDimension.xy).g   // add .g or nothing 
+  uv /= interlineDistance;
+  vec2 p = floor(uv+.5);
+  vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
 
-    #define M(c,T) color += pow(.5+.5*cos( 6.28*(uv-p).c + 4.0*(2.*T-1.) ),6.0)
+  //add .g or nothing 
+  #define T(x,y) texture(sourceTexture1, interlineDistance * vec2(x,y) / textureDimension.xy).g 
 
-    M( y, T( uv.x, p.y ) );   // modulates  y offset
-    M( x, T( p.x, uv.y ) );   // modulates  y offset
+  #define M(c,T) color += pow(.5+.5*cos( 6.28*(uv-p).c + amplicationFactor * (2.*T-1.) ), meshifyThickness)
+  //#define M(c,T) color += .5 + .5 * cos( 2.0 * PI * (uv-p).c + (2.*T-1.) )
 
-    return color;
+  if      ( meshify == uint(0) )
+    M( y, T( uv.x, p.y ) ); // modulates  y offset
+  else if ( meshify == uint(1) )
+    M( x, T( p.x, uv.y ) ); // modulates  x offset
+  else
+  {
+    M( y, T( uv.x, p.y ) );
+    M( x, T( p.x, uv.y ) );
+  }
+
+  return color;
 }
 
 void main()
@@ -198,6 +250,10 @@ void main()
 
     case 6:
       color = Meshify();
+      break;
+
+    case 7:
+      color = GradientColor();
       break;
 
 //    default:
