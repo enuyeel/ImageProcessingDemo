@@ -114,8 +114,8 @@ vec3 pixellating()
 vec3 waterColor()
 {
     vec2 textureDimension = (textureSize(sourceTexture1, 0) - 1);
-    vec2 blend_uv = floor(gl_FragCoord.xy) / textureDimension;
-    vec2 uv = vec2(1.0 - blend_uv.x, blend_uv.y);
+    vec2 blend_uv = gl_FragCoord.xy / textureSize(sourceTexture1, 0);
+    vec2 uv = vec2(1.0-blend_uv.x, blend_uv.y);
     vec3 intensity = 1.0 - texture(sourceTexture1, uv).rgb;
     
     float vidSample = dot(vec3(1.0), texture(sourceTexture1, uv).rgb);
@@ -125,7 +125,7 @@ vec3 waterColor()
     
     vec2 flow = delta * vec2 (vidSampleDy - vidSample, vidSample - vidSampleDx);
     
-    intensity = 0.005 * intensity + 0.995 * (1.0 - texture(sourceTexture2, blend_uv + vec2(-1.0, 1.0) * flow).rgb);
+    intensity = 0.0225 * intensity + 0.9775 * (1.0 - texture(sourceTexture2, blend_uv + vec2(-1.0, 1.0) * flow).rgb); //blend_uv).rgb);
     return 1.0 - intensity;
 }
 

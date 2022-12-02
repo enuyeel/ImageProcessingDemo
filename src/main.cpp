@@ -533,6 +533,7 @@ static void readSourceTexture(GLuint srcTexture, GLuint destTexture)
         0, GL_RGB,
         GL_UNSIGNED_BYTE, //8 bits
         global::copied.data());
+
 }
 
 //Should be called after both source textures are resized to equal sizes.
@@ -586,11 +587,9 @@ static void operationsUber(GLuint srcTexture1, GLuint srcTexture2, GLuint destTe
     //readSourceTexture(global::reserveTexture2, global::reserveTexture1);
     glActiveTexture(GL_TEXTURE0 + 1);
     opengl_check_error();
-    glBindTexture(GL_TEXTURE_2D, destTexture);
+    glBindTexture(GL_TEXTURE_2D, srcTexture2);
     opengl_check_error();
 
-    glActiveTexture(GL_TEXTURE0 + 2);
-    opengl_check_error();
     glBindTexture(GL_TEXTURE_2D, destTexture);
     opengl_check_error();
 
@@ -665,8 +664,10 @@ static void draw(double deltaTime)
 
     ///////////////OPERATIONS///////////////
     operationsUber(global::sourceTexture, global::reserveTexture1, global::reserveTexture2);
+    
 
-    //readSourceTexture(global::reserveTexture2, global::reserveTexture1);
+    readSourceTexture(global::reserveTexture2, global::reserveTexture1);
+
     scaleTexture(global::reserveTexture2, global::destinationTexture, global::windowWidth, global::windowHeight);
 
     drawFullscreenQuad(global::destinationTexture);
@@ -1004,6 +1005,7 @@ int main(int, char* [])
 
     glBindTexture(GL_TEXTURE_2D, global::reserveTexture2);
     opengl_check_error();
+
     //No matter what the source textures' formats are, reduce the output texture to 8 bit texture.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, //Only supporting 256 pixel depth (8 bits) PPM P3 image.
         global::sourceWidth, global::sourceHeight,
